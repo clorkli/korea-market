@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,10 +9,16 @@ import (
 	"strings"
 )
 
-func fetchTickers(client *http.Client, markets []string) ([]BithumbTicker, error) {
+func fetchTickers(ctx context.Context, client *http.Client, markets []string) ([]BithumbTicker, error) {
 	marketParam := strings.Join(markets, ",")
 	const tickerBaseURL = "https://api.bithumb.com/v1/ticker?markets="
-	resp, err := client.Get(tickerBaseURL + marketParam)
+	url := tickerBaseURL + marketParam
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("create ticker request: %w", err)
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("request ticker: %w", err)
 	}

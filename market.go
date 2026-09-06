@@ -22,6 +22,21 @@ type Quote struct {
 	PrevClose  float64
 }
 
+type SnapshotEntry struct {
+	Quote     Quote
+	ChangePct float64
+}
+
+type Snapshot struct {
+	Entries  []SnapshotEntry
+	Failures []SnapshotFailure
+}
+
+type SnapshotFailure struct {
+	Market string
+	Err    error
+}
+
 func tickerToQuote(t BithumbTicker) Quote {
 	return Quote{
 		Instrument: Instrument{
@@ -32,6 +47,38 @@ func tickerToQuote(t BithumbTicker) Quote {
 		Price:     t.TradePrice,
 		PrevClose: t.PrevClosingPrice,
 	}
+}
+
+func tickerToSnapshotEntry(t BithumbTicker) (SnapshotEntry, error) {
+	q := tickerToQuote(t)
+	pct, err := changePct(q)
+	if err != nil {
+		return SnapshotEntry{}, err
+	}
+
+	return SnapshotEntry{
+		Quote:     q,
+		ChangePct: pct,
+	}, nil
+}
+
+func buildSnapshot(tickers []BithumbTicker) Snapshot {
+	var snapshot Snapshot
+	for _, ticker := range tickers {
+		entry, err := tickerToSnapshotEntry(ticker)
+		if err != nil {
+			snapshot.Failures = append(
+				snapshot.Failures,
+				SnapshotFailure{
+					Market: ticker.Market,
+					Err:    err,
+				},
+			)
+			continue
+		}
+		snapshot.Entries = append(snapshot.Entries, entry)
+	}
+	return snapshot
 }
 
 func changePct(q Quote) (float64, error) {
