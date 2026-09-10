@@ -19,10 +19,15 @@ func main() {
 		Timeout: 5 * time.Second,
 	}
 
+	provider := BithumbProvider{
+		client:  client,
+		baseURL: bithumbTickerBaseURL,
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	tickers, err := fetchTickers(ctx, client, markets)
+	tickers, err := provider.fetchTickers(ctx, markets)
 	if err != nil {
 		switch {
 		case errors.Is(err, context.DeadlineExceeded):

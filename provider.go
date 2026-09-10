@@ -9,16 +9,22 @@ import (
 	"strings"
 )
 
-func fetchTickers(ctx context.Context, client *http.Client, markets []string) ([]BithumbTicker, error) {
+const bithumbTickerBaseURL = "https://api.bithumb.com/v1/ticker?markets="
+
+type BithumbProvider struct {
+	client  *http.Client
+	baseURL string
+}
+
+func (p *BithumbProvider) fetchTickers(ctx context.Context, markets []string) ([]BithumbTicker, error) {
 	marketParam := strings.Join(markets, ",")
-	const tickerBaseURL = "https://api.bithumb.com/v1/ticker?markets="
-	url := tickerBaseURL + marketParam
+	url := p.baseURL + marketParam
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("create ticker request: %w", err)
 	}
-	resp, err := client.Do(req)
+	resp, err := p.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("request ticker: %w", err)
 	}
