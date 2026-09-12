@@ -1,13 +1,19 @@
 # korea-market
-极简Go CLI抓取KRW加密货币市场快照，取自Bithumb公共API
 
-## 目前接入
-KRW-BTC、KRW-ETH、KRW-XRP
+开发中的 Go CLI，通过 Bithumb 公共 API 获取 KRW 加密货币行情快照。
+
+目前支持 BTC、ETH、XRP，输出价格和涨跌幅，支持请求超时与部分成功结果。
 
 ## Run
-go run .
 
-## Example
-KRW-BTC: 108765000.00, -0.14%
-KRW-ETH: 3378000.00, +0.60%
-KRW-XRP: 1929.00, -0.16%
+需要 Go 1.27.0+，运行时需联网。
+
+```bash
+go run .
+```
+
+## Test
+
+```bash
+go test ./...
+```
